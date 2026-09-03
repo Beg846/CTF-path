@@ -7,7 +7,6 @@ section .data
 section .bss
     num1 resb 100
     num2 resb 100
-    temp resb 100
     result resb 100
 
 section .text
@@ -26,6 +25,8 @@ _start:
     mov rdx, 100
     syscall
 
+    lea r12, [num1 + rax - 2]; r12 = địa chỉ chữ số hàng đơn vị của num1
+
     mov rax, 1
     mov rdi, 1
     mov rsi, enter2_msg
@@ -35,6 +36,16 @@ _start:
     mov rax, 0
     mov rdi, 0
     mov rsi, num2
+    mov rdx, 100
+    syscall
+
+    lea r13, [num2 + rax - 2]; r13 = địa chỉ chữ số hàng đơn vị của num1
+
+    call big_sum
+
+    mov rax, 1
+    mov rdi, 1
+    mov rsi, result
     mov rdx, 100
     syscall
 
@@ -53,15 +64,9 @@ big_sum:
     ;
     ;
     xor r14, r14
-    mov rsi, result
-    add rsi, 99
-    mov byte [rsi], 10
-    dec rsi
-    push rsi
-    mov rsi, num2
-    push rsi
-    mov rsi, num1
-    push rsi
+    mov r8, result + 99
+    mov byte [r8], 10
+    dec r8
 
 
 .bs_loop:
@@ -70,42 +75,45 @@ big_sum:
     ;lay '9'
     ;chuyen thanh so
     ;cho vao r12   
-    mov rsi, [rsp]
-    call converter
-    mov [rsp], rsi
-    mov r12, rax
+    mov rsi, r12
+    mov rbx, num1
+    call _converter
+    mov r12, rsi
+    mov r9, rax
     
     ;dua con tro vao num2
     ;36728
     ;lay '8'
     ;chuyen thanh so
     ;cho vao r13
-    mov rsi, [rsp + 8]
-    call converter
-    mov [rsp + 8], rsi
-    mov r13, rax
+    mov rsi, r13
+    mov rbx, num2
+    call _converter
+    mov r13, rsi
+    mov r10, rax
 
     xor r15, r15
-    mov r10, r12
-    call _cinc
-    mov r10, r13
-    call _cinc
+    mov r11, r12
+    call _cinc1
+    mov r11, r13
+    call _cinc2
     cmp r15, 2
+    jne .sum
+    cmp r14, 0
     je .big_sum_done
 
     ;r12 + r13 + bien nho
     ;cmp >= 10
     ; luu bien nho
-    add r12, r13
-    add r12, r14
+.sum:
+    add r9, r10
+    add r9, r14
     call _calculator 
 
     ;chuyen so cong thanh ky tu cho vo mang result
-    mov rsi, [rsp + 16]
-    add r12, 48
-    mov [rsi], dl
-    dec rsi
-    mov [rsp + 16], rsi
+    add rdx, 48
+    mov [r8], dl
+    dec r8
 
     jmp .bs_loop
 
@@ -113,9 +121,9 @@ big_sum:
 _calculator:
     xor rdx, rdx
     mov rbx, 10
-    mov rax, r12 
+    mov rax, r9
     div rbx
-    mov r12, rdx
+    mov r9, rdx
     mov r14, rax
     jmp __done
     
@@ -124,28 +132,36 @@ __done:
 
 
 _converter:
-    cmp rsi, 0
-    jne __convert
+    cmp rsi, rbx            ; So sánh trực tiếp con trỏ rsi với địa chỉ mảng rbx
+    jge __convert
     mov rax, 0
     ret
 
-__convert
+__convert:
     xor rax, rax
     xor rbx, rbx
     mov bl, [rsi]
-    inc rsi
-    imul rax, rax, 10
+    dec rsi
     sub bl, 48
     add rax, rbx
     ret
 
 
-_cinc:
-    cmp r10, 0
-    je __inc
+_cinc1:
+    cmp r11, num1
+    jl __inc
     ret
 
-__inc
+__inc:
+    inc r15
+    ret
+
+_cinc2:
+    cmp r11, num2
+    jl __inc
+    ret
+
+__inc:
     inc r15
     ret
 
