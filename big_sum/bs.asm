@@ -45,8 +45,6 @@ _start:
 
     mov rax, 1
     mov rdi, 1
-    mov rsi, result
-    mov rdx, 100
     syscall
 
     mov rax, 60
@@ -125,9 +123,6 @@ _calculator:
     div rbx
     mov r9, rdx
     mov r14, rax
-    jmp __done
-    
-__done:
     ret
 
 
@@ -152,7 +147,7 @@ _cinc1:
     jl __inc
     ret
 
-__inc:
+__inc1:
     inc r15
     ret
 
@@ -161,10 +156,14 @@ _cinc2:
     jl __inc
     ret
 
-__inc:
+__inc2:
     inc r15
     ret
 
     
 .big_sum_done:
+    inc r8
+    mov rsi, r8             ; Dòng này copy giá trị địa chỉ r8 sang rsi
+    mov rdx, result + 100
+    sub rdx, rsi            ; rsi ở đây chính là địa chỉ r8 đã được copy sang
     ret
