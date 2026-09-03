@@ -5,8 +5,9 @@ section .data
     enter2_msg_len equ $ - enter2_msg
 
 section .bss
-    num1_str resb 100
-    num2_str resb 100
+    num1 resb 100
+    num2 resb 100
+    temp resb 100
     result resb 100
 
 section .text
@@ -21,7 +22,7 @@ _start:
 
     mov rax, 0
     mov rdi, 0
-    mov rsi, num1_str
+    mov rsi, num1
     mov rdx, 100
     syscall
 
@@ -33,60 +34,103 @@ _start:
 
     mov rax, 0
     mov rdi, 0
-    mov rsi, num2_str
+    mov rsi, num2
     mov rdx, 100
-    syscall
-
-    mov rax, 1
-    mov rdi, 1
-    mov rdx, rcx
     syscall
 
     mov rax, 60
     mov rdi, 0
     syscall
 
-str_to_int:
-    xor rax, rax ;so sánh 2 thanh ghi theo xor nếu bằng thì trả về 0, nếu không bằng trả về 1
-    xor rbx, rbx
-    mov bl, [rsi]
-    cmp bl, 10
-    je .num_read_done
 
-.num_read:
-    ;n = n*10 + bl - 48('0')    
-    imul rax, rax, 10
-    sub bl, 48
-    add rax, rbx
-    inc rsi
-    mov bl, [rsi]
-    cmp bl, 10
-    jne .num_read
-
-.num_read_done:
-    ret
-
-int_to_str:
-    ; a= n % 10
-    ; a = a + 48
-    ; put a into result
-    xor rcx, rcx
-    mov rbx, 10
+big_sum:
+    ;khai báo biến nhớ
+    ;loop
+    ;chuyển 1 str thành int trong num1, num2
+    ;lưu r12, r13, r12 + r13 + r14
+    ;so sánh nếu >=10, gọi hàm tách, ret
+    ;chuyển thành str, thêm vào
+    ;
+    ;
+    xor r14, r14
     mov rsi, result
     add rsi, 99
     mov byte [rsi], 10
-    inc rsi
-
-.convert:
-    xor rdx, rdx
-    div rbx
-    add rdx, 48
     dec rsi
+    push rsi
+    mov rsi, num2
+    push rsi
+    mov rsi, num1
+    push rsi
+
+
+.bs_loop:
+    ;dua con tro vao num1
+    ;12809 
+    ;lay '9'
+    ;chuyen thanh so
+    ;cho vao r12   
+    xor rax, rax
+    xor rbx, rbx
+    mov rsi, [rsp]
+    mov bl, [rsi]
+    inc rsi
+    mov [rsp], rsi
+    imul rax, rax, 10
+    sub bl, 48
+    add rax, rbx
+    mov r12, rax
+    
+    ;dua con tro vao num2
+    ;36728
+    ;lay '8'
+    ;chuyen thanh so
+    ;cho vao r13
+    xor rax, rax
+    xor rbx, rbx
+    mov rsi, [rsp + 8]
+    mov bl, [rsi]
+    inc rsi
+    mov [rsp + 8], rsi
+    imul rax, rax, 10
+    sub bl, 48
+    add rax, rbx
+    mov r13, rax
+
+    ;r12 + r13 + bien nho
+    ;cmp >= 10
+    ; luu bien nho
+    add r12, r13
+    add r12, r14
+    call _calculate
+
+    ;chuyen so cong thanh ky tu cho vo mang result
+    mov rsi, [rsp + 16]
+    add r12, 48
     mov [rsi], dl
-    inc rcx 
-    cmp rax, 0
-    jg .convert
+    dec rsi
+    mov [rsp + 16], rsi
 
+    cmp 
+
+
+_calculate:
+    xor rdx, rdx
+    mov rbx, 10
+    mov rax, r12 
+    div rbx
+    mov r12, rdx
+    mov r14, rax
+    jmp __done
+    
+__done:
     ret
+    
+
+.big_sum_done:
+        ret
 
 
+
+move_num:
+    
