@@ -70,15 +70,9 @@ big_sum:
     ;lay '9'
     ;chuyen thanh so
     ;cho vao r12   
-    xor rax, rax
-    xor rbx, rbx
     mov rsi, [rsp]
-    mov bl, [rsi]
-    inc rsi
+    call converter
     mov [rsp], rsi
-    imul rax, rax, 10
-    sub bl, 48
-    add rax, rbx
     mov r12, rax
     
     ;dua con tro vao num2
@@ -86,23 +80,25 @@ big_sum:
     ;lay '8'
     ;chuyen thanh so
     ;cho vao r13
-    xor rax, rax
-    xor rbx, rbx
     mov rsi, [rsp + 8]
-    mov bl, [rsi]
-    inc rsi
+    call converter
     mov [rsp + 8], rsi
-    imul rax, rax, 10
-    sub bl, 48
-    add rax, rbx
     mov r13, rax
+
+    xor r15, r15
+    mov r10, r12
+    call _cinc
+    mov r10, r13
+    call _cinc
+    cmp r15, 2
+    je .big_sum_done
 
     ;r12 + r13 + bien nho
     ;cmp >= 10
     ; luu bien nho
     add r12, r13
     add r12, r14
-    call _calculate
+    call _calculator 
 
     ;chuyen so cong thanh ky tu cho vo mang result
     mov rsi, [rsp + 16]
@@ -111,10 +107,10 @@ big_sum:
     dec rsi
     mov [rsp + 16], rsi
 
-    cmp 
+    jmp .bs_loop
 
 
-_calculate:
+_calculator:
     xor rdx, rdx
     mov rbx, 10
     mov rax, r12 
@@ -125,12 +121,34 @@ _calculate:
     
 __done:
     ret
-    
 
+
+_converter:
+    cmp rsi, 0
+    jne __convert
+    mov rax, 0
+    ret
+
+__convert
+    xor rax, rax
+    xor rbx, rbx
+    mov bl, [rsi]
+    inc rsi
+    imul rax, rax, 10
+    sub bl, 48
+    add rax, rbx
+    ret
+
+
+_cinc:
+    cmp r10, 0
+    je __inc
+    ret
+
+__inc
+    inc r15
+    ret
+
+    
 .big_sum_done:
-        ret
-
-
-
-move_num:
-    
+    ret
