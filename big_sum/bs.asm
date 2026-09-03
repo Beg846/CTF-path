@@ -115,6 +115,14 @@ big_sum:
 
     jmp .bs_loop
 
+.big_sum_done:
+    inc r8
+    mov rsi, r8             ; Dòng này copy giá trị địa chỉ r8 sang rsi
+    mov rdx, result + 100
+    sub rdx, rsi            ; rsi ở đây chính là địa chỉ r8 đã được copy sang
+    ret
+
+
 
 _calculator:
     xor rdx, rdx
@@ -144,7 +152,7 @@ __convert:
 
 _cinc1:
     cmp r11, num1
-    jl __inc
+    jl __inc1
     ret
 
 __inc1:
@@ -153,17 +161,9 @@ __inc1:
 
 _cinc2:
     cmp r11, num2
-    jl __inc
+    jl __inc2
     ret
 
 __inc2:
     inc r15
-    ret
-
-    
-.big_sum_done:
-    inc r8
-    mov rsi, r8             ; Dòng này copy giá trị địa chỉ r8 sang rsi
-    mov rdx, result + 100
-    sub rdx, rsi            ; rsi ở đây chính là địa chỉ r8 đã được copy sang
     ret
